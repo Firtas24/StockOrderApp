@@ -1,0 +1,94 @@
+﻿@model StockOrderApp.Models.Order
+@using StockOrderApp.Helpers
+
+@{
+    ViewData["Title"] = $"Sipariş Detayı #{Model.Id}";
+
+    string BadgeClass(string? status) => status switch
+    {
+        OrderStatus.Preparing => "bg-warning text-dark",
+        OrderStatus.Shipped => "bg-info text-dark",
+        OrderStatus.Completed => "bg-success",
+        OrderStatus.Canceled => "bg-danger",
+        _ => "bg-secondary"
+    };
+}
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+        <h2 class="mb-0">Sipariş Detayı</h2>
+        <div class="text-muted">Sipariş No: #@Model.Id</div>
+    </div>
+
+    <a class="btn btn-outline-secondary" asp-controller="Orders" asp-action="Index">
+        ← Siparişlerim
+    </a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="text-muted">Durum</div>
+                <div class="fw-bold">
+                    <span class="badge @BadgeClass(Model.Status)">@Model.Status</span>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="text-muted">Tarih</div>
+                <div class="fw-bold">@Model.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="text-muted">Toplam</div>
+                <div class="fw-bold">@Model.Total.ToString("0.00") ₺</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <table class="table mb-0 table-striped">
+            <thead class="table-light">
+                <tr>
+                    <th>Ürün</th>
+                    <th style="width:120px;">Birim</th>
+                    <th style="width:120px;">Adet</th>
+                    <th style="width:160px;" class="text-end">Tutar</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Items == null || !Model.Items.Any())
+                {
+                    <tr>
+                        <td colspan="4" class="p-4 text-center text-muted">Sipariş kalemi yok.</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var i in Model.Items)
+                    {
+                        <tr>
+                            <td class="align-middle">@i.Product?.Name</td>
+                            <td class="align-middle">@i.UnitPrice.ToString("0.00") ₺</td>
+                            <td class="align-middle">@i.Quantity</td>
+                            <td class="align-middle text-end">@((i.UnitPrice * i.Quantity).ToString("0.00")) ₺</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

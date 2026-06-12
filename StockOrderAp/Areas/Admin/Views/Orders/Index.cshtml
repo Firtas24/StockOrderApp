@@ -1,0 +1,202 @@
+﻿@model List<StockOrderApp.Models.Order>
+@using StockOrderApp.Helpers
+
+@{
+    var statuses = ViewBag.StatusList as string[] ?? OrderStatus.All;
+
+    string selectedStatus = ViewBag.SelectedStatus as string ?? "";
+    string q = ViewBag.Q as string ?? "";
+    string from = ViewBag.From as string ?? "";
+    string to = ViewBag.To as string ?? "";
+
+    string BadgeClass(string? status) => status switch
+    {
+        OrderStatus.Preparing => "bg-warning text-dark",
+        OrderStatus.Shipped => "bg-info text-dark",
+        OrderStatus.Completed => "bg-success",
+        OrderStatus.Canceled => "bg-danger",
+        _ => "bg-secondary"
+    };
+
+    decimal SumGrandTotal()
+    {
+        // GrandTotal varsa onu, yoksa Total'ı topla
+        decimal sum = 0m;
+        foreach (var o in Model ?? new())
+        {
+            var gt = 0m;
+            try { gt = o.GrandTotal; } catch { gt = 0m; }
+            sum += (gt > 0 ? gt : o.Total);
+        }
+        return sum;
+    }
+
+    int CountBy(string s) => (Model ?? new()).Count(o => o.Status == s);
+}
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+        <h2 class="mb-0">Siparişler</h2>
+        <div class="text-muted">Tüm siparişleri görüntüle, filtrele ve durum güncelle.</div>
+    </div>
+</div>
+
+@if (TempData["success"] != null)
+{
+    <div class="alert alert-success border-0 rounded-4">@TempData["success"]</div>
+}
+@if (TempData["error"] != null)
+{
+    <div class="alert alert-danger border-0 rounded-4">@TempData["error"]</div>
+}
+
+<!-- ✅ KPI Şeridi -->
+<div class="row g-3 mb-3">
+    <div class="col-12 col-md-4">
+        <div class="bg-white border rounded-4 p-3 shadow-sm">
+            <div class="text-muted small">Toplam Sipariş</div>
+            <div class="fs-4 fw-bold">@((Model?.Count ?? 0))</div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+        <div class="bg-white border rounded-4 p-3 shadow-sm">
+            <div class="text-muted small">Toplam Ciro (Listelenen)</div>
+            <div class="fs-4 fw-bold">@SumGrandTotal().ToString("N2") ₺</div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+        <div class="bg-white border rounded-4 p-3 shadow-sm">
+            <div class="text-muted small">Durum Dağılımı</div>
+            <div class="small">
+                <span class="badge bg-warning text-dark me-1">Hazırlanıyor: @CountBy(OrderStatus.Preparing)</span>
+                <span class="badge bg-info text-dark me-1">Kargoda: @CountBy(OrderStatus.Shipped)</span>
+                <span class="badge bg-success me-1">Tamam: @CountBy(OrderStatus.Completed)</span>
+                <span class="badge bg-danger">İptal: @CountBy(OrderStatus.Canceled)</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ Filtre Barı -->
+<form method="get" class="row g-2 mb-3">
+    <div class="col-12 col-md-3">
+        <input name="q" value="@q" class="form-control"
+               placeholder="Ara: #id / ad / telefon" />
+    </div>
+
+    <div class="col-12 col-md-3">
+        <select name="status" class="form-select">
+            <option value="" selected="@(string.IsNullOrWhiteSpace(selectedStatus))">Tüm Durumlar</option>
+            @foreach (var s in statuses)
+            {
+                <option value="@s" selected="@(selectedStatus == s)">@s</option>
+            }
+        </select>
+    </div>
+
+    <div class="col-6 col-md-2">
+        <input type="date" name="from" value="@from" class="form-control" />
+    </div>
+
+    <div class="col-6 col-md-2">
+        <input type="date" name="to" value="@to" class="form-control" />
+    </div>
+
+    <div class="col-12 col-md-2 d-grid">
+        <button class="btn btn-dark" type="submit">Filtrele</button>
+    </div>
+
+    <div class="col-12 col-md-2 d-grid">
+        <a class="btn btn-outline-secondary"
+           asp-area="Admin" asp-controller="Orders" asp-action="Index">
+            Temizle
+        </a>
+    </div>
+</form>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <table class="table table-hover table-striped mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th style="width:90px;">#</th>
+                    <th>Kullanıcı</th>
+                    <th style="width:180px;">Tarih</th>
+                    <th style="width:130px;" class="text-end">Ara Toplam</th>
+                    <th style="width:120px;" class="text-end">İndirim</th>
+                    <th style="width:140px;" class="text-end">Genel</th>
+                    <th style="width:290px;">Durum</th>
+                    <th style="width:120px;"></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (Model == null || !Model.Any())
+                {
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">Henüz sipariş yok.</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var o in Model)
+                    {
+                        var grand = (o.GrandTotal > 0 ? o.GrandTotal : o.Total);
+                        <tr>
+                            <td class="align-middle">#@o.Id</td>
+                            <td class="align-middle">@o.UserId</td>
+                            <td class="align-middle">@o.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+
+                            <td class="align-middle text-end">@o.Total.ToString("N2") ₺</td>
+                            <td class="align-middle text-end">@o.DiscountTotal.ToString("N2") ₺</td>
+                            <td class="align-middle text-end fw-semibold">@grand.ToString("N2") ₺</td>
+
+                            <td class="align-middle">
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <span class="badge @BadgeClass(o.Status)">@o.Status</span>
+
+                                    @if (!string.IsNullOrWhiteSpace(o.CouponCode))
+                                    {
+                                        <span class="badge bg-light text-dark border">Kupon: @o.CouponCode</span>
+                                    }
+
+                                    <form asp-area="Admin"
+                                          asp-controller="Orders"
+                                          asp-action="UpdateStatus"
+                                          asp-route-id="@o.Id"
+                                          method="post"
+                                          class="d-flex align-items-center gap-2">
+                                        @Html.AntiForgeryToken()
+
+                                        <select name="status" class="form-select form-select-sm" style="width: 180px;">
+                                            @foreach (var s in statuses)
+                                            {
+                                                <option value="@s" selected="@(o.Status == s)">@s</option>
+                                            }
+                                        </select>
+
+                                        <button type="submit" class="btn btn-sm btn-outline-primary">
+                                            Güncelle
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+
+                            <td class="align-middle text-end">
+                                <a class="btn btn-sm btn-outline-primary"
+                                   asp-area="Admin"
+                                   asp-controller="Orders"
+                                   asp-action="Details"
+                                   asp-route-id="@o.Id">
+                                    Detay
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,70 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<h2 class="mb-4">Dashboard</h2>
+
+<div class="row g-4">
+
+    <!-- Toplam Kategori -->
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h6 class="text-muted">Toplam Kategori</h6>
+                <h2 class="fw-bold">@ViewBag.CategoryCount</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toplam Ürün -->
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h6 class="text-muted">Toplam Ürün</h6>
+                <h2 class="fw-bold">@ViewBag.ProductCount</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stokta Olmayan -->
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 border-danger">
+            <div class="card-body">
+                <h6 class="text-danger">Stokta Yok</h6>
+                <h2 class="fw-bold text-danger">@ViewBag.OutOfStockCount</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kritik Stok -->
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 border-warning">
+            <div class="card-body">
+                <h6 class="text-warning">Kritik Stok (≤5)</h6>
+                <h2 class="fw-bold text-warning">@ViewBag.LowStockCount</h2>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<hr class="my-5" />
+
+<h5 class="mb-3">Hızlı İşlemler</h5>
+
+<div class="d-flex gap-3 flex-wrap">
+    <a asp-area="Admin" asp-controller="Products" asp-action="Create"
+       class="btn btn-primary">
+        + Yeni Ürün
+    </a>
+
+    <a asp-area="Admin" asp-controller="Categories" asp-action="Create"
+       class="btn btn-outline-secondary">
+        + Yeni Kategori
+    </a>
+
+    <a asp-area="Admin" asp-controller="Products" asp-action="Index"
+       class="btn btn-outline-dark">
+        Ürünleri Yönet
+    </a>
+</div>

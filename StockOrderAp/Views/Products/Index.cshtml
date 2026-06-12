@@ -1,0 +1,137 @@
+﻿@model List<Product>
+@using StockOrderApp.Models
+@using Microsoft.AspNetCore.Identity
+@using StockOrderAp.Data
+@inject ApplicationDbContext _db
+@inject UserManager<IdentityUser> _userManager
+
+@{
+    ViewData["Title"] = "Ürünler";
+
+    var categories = ViewBag.Categories as List<Category> ?? new();
+    int? selectedCategoryId = ViewBag.SelectedCategoryId as int?;
+    string searchText = ViewBag.Search as string ?? "";
+    string sort = ViewBag.Sort as string ?? "";
+
+    var favSet = new HashSet<int>();
+    if (User.Identity?.IsAuthenticated == true)
+    {
+        var userId = _userManager.GetUserId(User);
+        favSet = _db.UserFavorites
+            .Where(x => x.UserId == userId)
+            .Select(x => x.ProductId)
+            .ToHashSet();
+    }
+}
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+        <h2 class="mb-0">Ürünler</h2>
+        <div class="text-muted">Ürünleri ara, filtrele, favorile veya sepete ekle.</div>
+    </div>
+
+    <a class="btn btn-outline-dark" asp-controller="Favorites" asp-action="Index">
+        ❤️ Favorilerim
+    </a>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-4">
+        <input name="search" value="@searchText" class="form-control" placeholder="Ürün veya kategori ara..." />
+    </div>
+
+    <div class="col-md-4">
+        <select name="categoryId" class="form-select">
+            <option value="">Tüm Kategoriler</option>
+            @foreach (var c in categories)
+            {
+                <option value="@c.Id" selected="@(selectedCategoryId == c.Id)">
+                    @c.Name
+                </option>
+            }
+        </select>
+    </div>
+
+    <div class="col-md-3">
+        <select name="sort" class="form-select">
+            <option value="" selected="@(string.IsNullOrWhiteSpace(sort))">En Yeni</option>
+            <option value="priceAsc" selected="@(sort == "priceAsc")">Fiyat (Artan)</option>
+            <option value="priceDesc" selected="@(sort == "priceDesc")">Fiyat (Azalan)</option>
+            <option value="stockDesc" selected="@(sort == "stockDesc")">Stok (Yüksek)</option>
+        </select>
+    </div>
+
+    <div class="col-md-1 d-grid">
+        <button class="btn btn-dark" type="submit">Ara</button>
+    </div>
+</form>
+
+@if (TempData["success"] != null)
+{
+    <div class="alert alert-success border-0 rounded-4">@TempData["success"]</div>
+}
+@if (TempData["error"] != null)
+{
+    <div class="alert alert-danger border-0 rounded-4">@TempData["error"]</div>
+}
+
+<div class="row">
+    @foreach (var item in Model)
+    {
+        bool isFav = favSet.Contains(item.Id);
+
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 shadow-sm position-relative">
+
+                @* Favori Butonu *@
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <form asp-controller="Favorites" asp-action="Toggle" method="post"
+                          class="position-absolute top-0 end-0 m-2">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="productId" value="@item.Id" />
+                        <button type="submit"
+                                class="btn btn-light btn-sm shadow-sm"
+                                title="Favoriye ekle/çıkar">
+                            @(isFav ? "❤️" : "🤍")
+                        </button>
+                    </form>
+                }
+
+                <div class="card-body d-flex flex-column">
+                    <h5 class="mb-1">@item.Name</h5>
+                    <div class="text-muted small mb-2">Kategori: @item.Category?.Name</div>
+
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div class="fw-bold">@item.Price.ToString("N2") ₺</div>
+                        <div class="small @(item.Stock > 0 ? "text-success" : "text-danger")">
+                            Stok: @item.Stock
+                        </div>
+                    </div>
+
+                    <div class="mt-auto d-flex gap-2">
+                        <a class="btn btn-outline-primary flex-grow-1"
+                           asp-action="Details"
+                           asp-route-id="@item.Id">
+                            Detay
+                        </a>
+
+                        <a class="btn btn-primary flex-grow-1 @(item.Stock <= 0 ? "disabled" : "")"
+                           asp-controller="Cart"
+                           asp-action="Add"
+                           asp-route-id="@item.Id">
+                            Sepete Ekle
+                        </a>
+                    </div>
+
+                    @if (User.Identity?.IsAuthenticated != true)
+                    {
+                        <div class="small text-muted mt-2">
+                            Favorilere eklemek için giriş yap.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>

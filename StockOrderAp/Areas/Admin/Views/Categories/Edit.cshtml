@@ -1,0 +1,29 @@
+﻿@model StockOrderApp.Models.Category
+
+<div asp-validation-summary="ModelOnly" style="color:red; margin-bottom:10px;"></div>
+
+<h2>Kategori Düzenle</h2>
+
+<form method="post"
+      asp-area="Admin"
+      asp-controller="Categories"
+      asp-action="Edit"
+      asp-route-id="@Model.Id">
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" asp-for="Id" />
+
+    <div>
+        <label asp-for="Name"></label><br />
+        <input asp-for="Name" />
+        <span asp-validation-for="Name" style="color:red"></span>
+    </div>
+
+    <br />
+    <button type="submit">Güncelle</button>
+    <a asp-area="Admin" asp-controller="Categories" asp-action="Index">Geri</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,101 @@
+﻿@model StockOrderApp.Models.Category
+
+@{
+    ViewData["Title"] = "Yeni Kategori";
+}
+
+<div style="
+    min-height: calc(100vh - 120px);
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:24px;">
+
+    <div style="
+        width:100%;
+        max-width: 560px;
+        border:1px solid #e5e7eb;
+        border-radius:16px;
+        padding:22px;
+        background:#fff;
+        box-shadow: 0 10px 30px rgba(0,0,0,.06);">
+
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+            <div>
+                <h2 style="margin:0; font-size:26px;">Yeni Kategori</h2>
+                <div style="margin-top:6px; color:#6b7280; font-size:14px;">
+                    Kategori adını girip kaydedebilirsin.
+                </div>
+            </div>
+
+            <a href="/Admin/Categories"
+               style="text-decoration:none; padding:8px 10px; border:1px solid #d0d5dd; border-radius:10px;">
+                ← Geri
+            </a>
+        </div>
+
+        <hr style="border:none; border-top:1px solid #eee; margin:16px 0;" />
+
+        <form method="post" action="/Admin/Categories/Create">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" style="color:#b42318; margin-bottom:10px;"></div>
+
+            <label asp-for="Name" style="display:block; font-weight:700; margin-bottom:6px;">Kategori Adı</label>
+
+            <input asp-for="Name"
+                   placeholder="Örn: Elektronik"
+                   style="
+                        width:100%;
+                        padding:10px 12px;
+                        border:1px solid #d0d5dd;
+                        border-radius:12px;
+                        outline:none;"
+                   onfocus="this.style.borderColor='#0d6efd'; this.style.boxShadow='0 0 0 4px rgba(13,110,253,.15)';"
+                   onblur="this.style.borderColor='#d0d5dd'; this.style.boxShadow='none';" />
+
+            <div style="margin-top:6px;">
+                <span asp-validation-for="Name" style="color:#b42318; font-size:13px;"></span>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:16px;">
+                <button id="btnSave" type="submit"
+                        style="
+                            padding:10px 14px;
+                            background:#0d6efd;
+                            color:#fff;
+                            border:none;
+                            border-radius:12px;
+                            cursor:pointer;
+                            font-weight:700;">
+                    Kaydet
+                </button>
+
+                <a href="/Admin/Categories"
+                   style="
+                        padding:10px 14px;
+                        border:1px solid #d0d5dd;
+                        border-radius:12px;
+                        text-decoration:none;
+                        color:#111827;">
+                    İptal
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // opsiyonel: çift tıklamada iki kere göndermesin
+        const btn = document.getElementById('btnSave');
+        if (btn) {
+            btn.closest('form')?.addEventListener('submit', () => {
+                btn.disabled = true;
+                btn.style.opacity = '0.75';
+                btn.innerText = 'Kaydediliyor...';
+            });
+        }
+    </script>
+}

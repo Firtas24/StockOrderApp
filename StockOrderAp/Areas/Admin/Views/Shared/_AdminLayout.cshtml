@@ -1,0 +1,89 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin</title>
+
+    <!-- Bootstrap + Site CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body style="margin:0; background:#f5f6f8;">
+
+    <div class="d-flex" style="min-height:100vh;">
+
+        <!-- Sidebar -->
+        @{
+            var area = (ViewContext.RouteData.Values["area"]?.ToString() ?? "");
+            var controller = (ViewContext.RouteData.Values["controller"]?.ToString() ?? "");
+            var action = (ViewContext.RouteData.Values["action"]?.ToString() ?? "");
+
+            string Active(string c, string? a = null)
+            {
+                var okController = string.Equals(controller, c, StringComparison.OrdinalIgnoreCase);
+                var okAction = a == null || string.Equals(action, a, StringComparison.OrdinalIgnoreCase);
+                return (okController && okAction) ? "background:rgba(255,255,255,.12);" : "";
+            }
+        }
+
+        <aside style="width:260px; background:#111827; color:#fff; padding:18px;">
+            <div style="font-size:20px; font-weight:800; margin-bottom:18px;">
+                StockOrder Admin
+            </div>
+
+            <nav class="d-flex flex-column gap-2">
+
+                <!-- ✅ Yeni Dashboard -->
+                <a class="text-white text-decoration-none px-3 py-2 rounded"
+                   style="@Active("Dashboard", "Index")"
+                   asp-area="Admin"
+                   asp-controller="Dashboard"
+                   asp-action="Index">
+                    Dashboard
+                </a>
+
+                <a class="text-white text-decoration-none px-3 py-2 rounded"
+                   style="@Active("Categories")"
+                   asp-area="Admin"
+                   asp-controller="Categories"
+                   asp-action="Index">
+                    Kategoriler
+                </a>
+
+                <a class="text-white text-decoration-none px-3 py-2 rounded"
+                   style="@Active("Products")"
+                   asp-area="Admin"
+                   asp-controller="Products"
+                   asp-action="Index">
+                    Ürünler
+                </a>
+
+                <a class="text-white text-decoration-none px-3 py-2 rounded"
+                   style="@Active("Orders")"
+                   asp-area="Admin"
+                   asp-controller="Orders"
+                   asp-action="Index">
+                    Siparişler
+                </a>
+            </nav>
+
+            <div style="margin-top:18px; font-size:12px; color:#9ca3af;">
+                Menüden istediğin yere geçebilirsin.
+            </div>
+        </aside>
+
+        <!-- Content -->
+        <main class="flex-grow-1 p-4">
+            <div class="bg-white border rounded-4 p-4 shadow-sm">
+                @RenderBody()
+            </div>
+        </main>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

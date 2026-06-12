@@ -1,0 +1,151 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+
+    var lowStock = ViewBag.LowStock as List<StockOrderApp.Models.Product> ?? new();
+    var topProducts = ViewBag.TopProducts as IEnumerable<dynamic> ?? new List<dynamic>();
+    var lastOrders = ViewBag.LastOrders as List<StockOrderApp.Models.Order> ?? new();
+
+    decimal todayRevenue = ViewBag.TodayRevenue ?? 0m;
+    decimal totalRevenue = ViewBag.TotalRevenue ?? 0m;
+    int todayOrder = ViewBag.TodayOrderCount ?? 0;
+    int totalOrder = ViewBag.TotalOrderCount ?? 0;
+}
+
+<h2 class="mb-4">📊 Yönetim Paneli</h2>
+
+<div class="row g-3 mb-4">
+
+    <div class="col-md-3">
+        <div class="card shadow-sm p-3">
+            <div class="text-muted">Bugünkü Sipariş</div>
+            <div class="fs-3 fw-bold">@todayOrder</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm p-3">
+            <div class="text-muted">Bugünkü Ciro</div>
+            <div class="fs-3 fw-bold">@todayRevenue.ToString("N2") ₺</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm p-3">
+            <div class="text-muted">Toplam Sipariş</div>
+            <div class="fs-3 fw-bold">@totalOrder</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm p-3">
+            <div class="text-muted">Toplam Ciro</div>
+            <div class="fs-3 fw-bold">@totalRevenue.ToString("N2") ₺</div>
+        </div>
+    </div>
+
+</div>
+
+<hr />
+
+<h4>⚠ Kritik Stok</h4>
+<ul class="list-group mb-4">
+    @if (!lowStock.Any())
+    {
+        <li class="list-group-item text-muted">Kritik stok yok</li>
+    }
+    else
+    {
+        foreach (var p in lowStock)
+        {
+            <li class="list-group-item d-flex justify-content-between">
+                <span>@p.Name</span>
+                <span class="badge bg-danger">Stok: @p.Stock</span>
+            </li>
+        }
+    }
+</ul>
+
+<h4>🔥 En Çok Satan Ürünler</h4>
+<ul class="list-group mb-4">
+    @if (!topProducts.Any())
+    {
+        <li class="list-group-item text-muted">Henüz satış verisi yok</li>
+    }
+    else
+    {
+        foreach (var p in topProducts)
+        {
+            <li class="list-group-item d-flex justify-content-between">
+                <span>@p.Name</span>
+                <span class="badge bg-success">@p.Quantity adet</span>
+            </li>
+        }
+    }
+</ul>
+
+<h4>🧾 Son Siparişler</h4>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Müşteri</th>
+            <th>Toplam</th>
+            <th>Durum</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!lastOrders.Any())
+        {
+            <tr>
+                <td colspan="4" class="text-center text-muted">Henüz sipariş yok</td>
+            </tr>
+        }
+        else
+        {
+            foreach (var o in lastOrders)
+            {
+                <tr>
+                    <td>#@o.Id</td>
+                    <td>@o.FullName</td>
+                    <td>@(o.GrandTotal > 0 ? o.GrandTotal : o.Total) ₺</td>
+                    <td>@o.Status</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+<hr />
+
+<h4 class="mb-3">📈 Günlük Satış (Son 7 Gün)</h4>
+
+<div class="card shadow-sm p-3 mb-4">
+    <canvas id="dailySalesChart" style="height:120px;"></canvas>
+</div>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        const labels = @Html.Raw(ViewBag.ChartLabelsJson ?? "[]");
+        const data = @Html.Raw(ViewBag.ChartDataJson ?? "[]");
+
+        const ctx = document.getElementById('dailySalesChart');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Ciro (₺)',
+                    data: data,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    </script>
+}
+

@@ -1,0 +1,94 @@
+﻿@model StockOrderApp.ViewModels.CheckoutVM
+
+<h2>Checkout</h2>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="text-danger">
+        @foreach (var err in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <div>@err.ErrorMessage</div>
+        }
+    </div>
+}
+
+<div class="row">
+    <div class="col-lg-6">
+        <form asp-action="PlaceOrder" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="mb-3">
+                <label class="form-label">Ad Soyad</label>
+                <input class="form-control" asp-for="FullName" />
+                <span class="text-danger" asp-validation-for="FullName"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Telefon</label>
+                <input class="form-control" asp-for="Phone" />
+                <span class="text-danger" asp-validation-for="Phone"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Adres</label>
+                <textarea class="form-control" rows="3" asp-for="Address"></textarea>
+                <span class="text-danger" asp-validation-for="Address"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Not (opsiyonel)</label>
+                <textarea class="form-control" rows="2" asp-for="Note"></textarea>
+                <span class="text-danger" asp-validation-for="Note"></span>
+            </div>
+
+            <button class="btn btn-primary" type="submit">
+                Siparişi Onayla
+            </button>
+            <a class="btn btn-outline-secondary" asp-controller="Cart" asp-action="Index">Sepete Dön</a>
+        </form>
+    </div>
+
+    <div class="col-lg-6">
+        <h5>Sepet Özeti</h5>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Ürün</th>
+                    <th>Adet</th>
+                    <th>Tutar</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var line in Model.Cart.Lines)
+                {
+                    <tr>
+                        <td>@line.Name</td>
+                        <td>@line.Quantity</td>
+                        <td>@line.LineTotal.ToString("0.00") ₺</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2" class="text-end text-muted">Ara Toplam</td>
+                    <td class="text-end">@ViewBag.Subtotal.ToString("N2") ₺</td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="text-end text-muted">
+                        İndirim @(string.IsNullOrWhiteSpace((string)ViewBag.CouponCode) ? "" : $"({ViewBag.CouponCode})")
+                    </td>
+                    <td class="text-end">-@ViewBag.Discount.ToString("N2") ₺</td>
+                </tr>
+                <tr class="fw-bold">
+                    <td colspan="2" class="text-end">Genel Toplam</td>
+                    <td class="text-end">@ViewBag.GrandTotal.ToString("N2") ₺</td>
+                </tr>
+
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

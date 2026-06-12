@@ -1,0 +1,115 @@
+﻿@model StockOrderApp.ViewModels.CartVM
+
+<h2>Sepetim</h2>
+
+@if (!Model.Lines.Any())
+{
+    <div class="alert alert-info">Sepet boş.</div>
+    <a class="btn btn-primary" asp-controller="Products" asp-action="Index">Ürünlere Git</a>
+}
+else
+{
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>Ürün</th>
+                <th style="width:140px;">Fiyat</th>
+                <th style="width:220px;">Adet</th>
+                <th style="width:160px;">Ara Toplam</th>
+                <th style="width:120px;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var line in Model.Lines)
+            {
+                <tr>
+                    <td>
+                        <strong>@line.Name</strong><br />
+                        <small class="text-muted">Stok: @line.Stock</small>
+                    </td>
+                    <td>@line.Price.ToString("0.00") ₺</td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <a class="btn btn-outline-secondary"
+                               asp-controller="Cart" asp-action="Decrease" asp-route-id="@line.ProductId">-</a>
+
+                            <span class="btn btn-light disabled">@line.Quantity</span>
+
+                            <a class="btn btn-outline-secondary"
+                               asp-controller="Cart" asp-action="Add" asp-route-id="@line.ProductId">+</a>
+                        </div>
+                    </td>
+                    <td><strong>@line.LineTotal.ToString("0.00") ₺</strong></td>
+                    <td>
+                        <a class="btn btn-outline-danger"
+                           asp-controller="Cart" asp-action="Remove" asp-route-id="@line.ProductId">Sil</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- ✅ KUPON -->
+    <div class="mt-3">
+        <form asp-controller="Cart" asp-action="ApplyCoupon" method="post" class="d-flex gap-2">
+            @Html.AntiForgeryToken()
+            <input name="code" class="form-control" placeholder="Kupon kodu (örn: KUPON10)" />
+            <button class="btn btn-dark" type="submit">Uygula</button>
+
+            @if (!string.IsNullOrWhiteSpace(ViewBag.CouponCode as string))
+            {
+                <a class="btn btn-outline-secondary"
+                   asp-controller="Cart"
+                   asp-action="ClearCoupon">
+                    Kaldır
+                </a>
+            }
+        </form>
+
+        @if (TempData["couponError"] != null)
+        {
+            <div class="alert alert-danger mt-2">@TempData["couponError"]</div>
+        }
+        @if (TempData["couponSuccess"] != null)
+        {
+            <div class="alert alert-success mt-2">@TempData["couponSuccess"]</div>
+        }
+    </div>
+
+    <div class="d-flex justify-content-between mt-4">
+        <div>
+            <div class="text-muted">Toplam ürün adedi: <strong>@Model.TotalItems</strong></div>
+        </div>
+
+        <div class="text-end" style="min-width:260px;">
+            @{
+                decimal subtotal = ViewBag.Subtotal ?? Model.Subtotal;
+                decimal discount = ViewBag.Discount ?? 0m;
+                decimal grandTotal = ViewBag.GrandTotal ?? Model.Subtotal;
+            }
+
+            <div class="d-flex justify-content-between">
+                <span class="text-muted">Ara Toplam</span>
+                <strong>@subtotal.ToString("0.00") ₺</strong>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <span class="text-muted">İndirim</span>
+                <strong>-@discount.ToString("0.00") ₺</strong>
+            </div>
+
+            <hr class="my-2" />
+
+            <div class="d-flex justify-content-between fs-5">
+                <span>Genel Toplam</span>
+                <strong>@grandTotal.ToString("0.00") ₺</strong>
+            </div>
+
+            <a class="btn btn-success mt-2 w-100"
+               asp-controller="Checkout"
+               asp-action="Index">
+                Siparişe Devam
+            </a>
+        </div>
+    </div>
+}

@@ -1,0 +1,133 @@
+﻿@model List<StockOrderApp.Models.Category>
+
+@{
+    ViewData["Title"] = "Kategoriler";
+    int page = ViewBag.Page ?? 1;
+    int pageSize = ViewBag.PageSize ?? 10;
+    int total = ViewBag.TotalCount ?? 0;
+    int totalPages = (int)Math.Ceiling((double)total / pageSize);
+    string q = ViewBag.Q as string ?? "";
+}
+
+<h2 style="margin-bottom:6px;">Kategoriler</h2>
+<div style="color:#6c757d; margin-bottom:12px;">
+    Toplam: <strong>@total</strong> • Sayfa: <strong></strong>/<strong>@(totalPages == 0 ? 1 : totalPages)</strong>
+</div>
+
+@if (TempData["success"] != null)
+{
+    <div id="toastSuccess" style="margin:10px 0; padding:10px 14px; background:#d1e7dd; color:#0f5132; border:1px solid #badbcc; border-radius:8px;">
+        @TempData["success"]
+    </div>
+}
+@if (TempData["error"] != null)
+{
+    <div id="toastError" style="margin:10px 0; padding:10px 14px; background:#f8d7da; color:#842029; border:1px solid #f5c2c7; border-radius:8px;">
+        @TempData["error"]
+    </div>
+}
+
+<div style="display:flex; gap:10px; align-items:center; margin:12px 0;">
+    <a href="/Admin/Categories/Create"
+       style="display:inline-block; padding:10px 14px; background:#0d6efd; color:white; border-radius:10px; text-decoration:none;">
+        + Yeni Kategori
+    </a>
+
+    <form method="get" action="/Admin/Categories" style="display:flex; gap:8px; align-items:center;">
+        <input type="text" name="q" value="@q" placeholder="Kategori ara..."
+               style="padding:9px 10px; width:260px; border:1px solid #d0d5dd; border-radius:10px;" />
+        <button type="submit" style="padding:9px 12px; border:1px solid #d0d5dd; border-radius:10px; cursor:pointer;">
+            Ara
+        </button>
+        @if (!string.IsNullOrWhiteSpace(q))
+        {
+            <a href="/Admin/Categories" style="text-decoration:none;">Temizle</a>
+        }
+    </form>
+</div>
+
+<div style="border:1px solid #e5e7eb; border-radius:12px; overflow:hidden;">
+    <table style="width:100%; border-collapse:collapse;">
+        <thead style="background:#f8f9fa;">
+            <tr>
+                <th style="text-align:left; padding:12px 14px; width:90px;">#</th>
+                <th style="text-align:left; padding:12px 14px;">Ad</th>
+                <th style="text-align:right; padding:12px 14px; width:260px;">İşlemler</th>
+            </tr>
+        </thead>
+        <tbody>
+        @if (Model == null || Model.Count == 0)
+        {
+            <tr>
+                <td colspan="3" style="padding:16px 14px; color:#6c757d;">Kayıt yok.</td>
+            </tr>
+        }
+        else
+        {
+            foreach (var item in Model)
+            {
+                <tr style="border-top:1px solid #eee;">
+                    <td style="padding:12px 14px; color:#6c757d;">@item.Id</td>
+                    <td style="padding:12px 14px; font-weight:600;">@item.Name</td>
+                    <td style="padding:12px 14px; text-align:right;">
+                        <a href="/Admin/Categories/Edit/@item.Id"
+                           style="display:inline-block; padding:7px 10px; border:1px solid #cbd5e1; border-radius:10px; text-decoration:none; margin-right:8px;">
+                            Düzenle
+                        </a>
+
+                        <form action="/Admin/Categories/Delete/@item.Id" method="post" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit"
+                                    onclick="return confirm('Silmek istediğine emin misin?');"
+                                    style="padding:7px 10px; border:1px solid #ef4444; color:#ef4444; background:transparent; border-radius:10px; cursor:pointer;">
+                                Sil
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        }
+        </tbody>
+    </table>
+</div>
+
+@if (totalPages > 1)
+{
+    <div style="margin-top:14px; display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+        @if (page > 1)
+        {
+            <a href="?page=@(page - 1)&q=@q" style="text-decoration:none; padding:6px 10px; border:1px solid #d0d5dd; border-radius:10px;">« Önceki</a>
+        }
+
+        @for (int i = 1; i <= totalPages; i++)
+        {
+            if (i == page)
+            {
+                <strong style="padding:6px 10px; border:1px solid #0d6efd; border-radius:10px;">@i</strong>
+            }
+            else
+            {
+                <a href="?page=@i&q=@q" style="text-decoration:none; padding:6px 10px; border:1px solid #d0d5dd; border-radius:10px;">@i</a>
+            }
+        }
+
+        @if (page < totalPages)
+        {
+            <a href="?page=@(page + 1)&q=@q" style="text-decoration:none; padding:6px 10px; border:1px solid #d0d5dd; border-radius:10px;">Sonraki »</a>
+        }
+    </div>
+}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    ["toastSuccess", "toastError"].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        setTimeout(function () {
+            el.style.opacity = "0";
+            el.style.transition = "opacity 400ms ease";
+            setTimeout(function () { el.remove(); }, 450);
+        }, 2500);
+    });
+});
+</script>

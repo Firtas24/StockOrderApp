@@ -1,0 +1,252 @@
+﻿@using StockOrderApp.Models
+@{
+    ViewData["Title"] = "Home";
+
+    var featured = ViewBag.FeaturedProducts as List<Product> ?? new();
+    var categories = ViewBag.Categories as List<Category> ?? new();
+    var recommended = ViewBag.Recommended as List<Product> ?? new();
+}
+
+<div class="mb-3">
+    <div class="alert alert-dark border-0 rounded-4 py-2 mb-0 d-flex justify-content-between align-items-center">
+        <div class="small">
+            <strong>Yeni:</strong> Sipariş sonrası stok otomatik düşer. Hızlı alışveriş için ürünleri incele.
+        </div>
+        <a class="btn btn-sm btn-light" asp-controller="Products" asp-action="Index">Ürünlere Git</a>
+    </div>
+</div>
+
+<section class="p-4 p-md-5 mb-4 bg-light rounded-4 border">
+    <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+            <h1 class="fw-bold mb-2">Hızlı ve Kolay Sipariş</h1>
+            <p class="text-muted mb-4">
+                Ürünleri incele, sepete ekle ve siparişini birkaç adımda tamamla.
+            </p>
+
+            <div class="d-flex gap-2 flex-wrap">
+                <a class="btn btn-primary" asp-controller="Products" asp-action="Index">Ürünleri İncele</a>
+                <a class="btn btn-outline-secondary" asp-controller="Cart" asp-action="Index">Sepete Git</a>
+
+                @if (User.Identity?.IsAuthenticated != true)
+                {
+                    <a class="btn btn-outline-primary" asp-area="Identity" asp-page="/Account/Login">Giriş Yap</a>
+                }
+            </div>
+
+            <form class="row g-2 mt-3" method="get" asp-controller="Products" asp-action="Index">
+                <div class="col-12 col-md-8">
+                    <input name="q" class="form-control" placeholder="Ürün ara (örn: süt, telefon, kalem)..." />
+                </div>
+                <div class="col-12 col-md-4 d-grid">
+                    <button class="btn btn-dark" type="submit">Ara</button>
+                </div>
+            </form>
+
+            <div class="mt-3 text-muted small">
+                Stok durumuna göre listelenir. Sipariş sonrası stok otomatik güncellenir.
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="row g-3">
+                <div class="col-12">
+                    <div class="bg-white rounded-4 border p-3 shadow-sm">
+                        <div class="fw-semibold">Hızlı Sipariş</div>
+                        <div class="text-muted small">Ürün → Sepet → Checkout</div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="bg-white rounded-4 border p-3 shadow-sm">
+                        <div class="fw-semibold">Sipariş Takibi</div>
+                        <div class="text-muted small">Siparişlerim sayfasından görüntüle</div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="bg-white rounded-4 border p-3 shadow-sm">
+                        <div class="fw-semibold">Stok Yönetimi</div>
+                        <div class="text-muted small">Admin panelden ürün/kategori yönet</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-4">
+        <div class="bg-white border rounded-4 p-3 shadow-sm">
+            <div class="text-muted small">Öne Çıkan Ürünler</div>
+            <div class="fs-4 fw-bold">@featured.Count</div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="bg-white border rounded-4 p-3 shadow-sm">
+            <div class="text-muted small">Kategoriler</div>
+            <div class="fs-4 fw-bold">@categories.Count</div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="bg-white border rounded-4 p-3 shadow-sm">
+            <div class="text-muted small">Hızlı İşlem</div>
+            <div class="fs-6 fw-semibold">Sepet → Checkout → Sipariş</div>
+        </div>
+    </div>
+</div>
+
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <section class="mb-4">
+        <div class="row g-3">
+            <div class="col-12 col-lg-8">
+                <div class="bg-white border rounded-4 p-4 shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-semibold">Hızlı İşlemler</div>
+                            <div class="text-muted small">Siparişlerine bakabilir veya alışverişe devam edebilirsin.</div>
+                        </div>
+                        <span class="badge bg-light text-dark">Aktif oturum</span>
+                    </div>
+
+                    <div class="d-flex gap-2 flex-wrap mt-3">
+                        <a class="btn btn-outline-primary" asp-controller="Orders" asp-action="Index">Siparişlerim</a>
+                        <a class="btn btn-outline-secondary" asp-controller="Cart" asp-action="Index">Sepetim</a>
+                        <a class="btn btn-primary" asp-controller="Products" asp-action="Index">Alışverişe Devam</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-4">
+                <div class="bg-light border rounded-4 p-4 h-100">
+                    <div class="fw-semibold mb-2">İpucu</div>
+                    <div class="text-muted small">
+                        Ürün stokları anlık güncellenir. Stok azalan ürünleri hızlıca sepetine ekleyebilirsin.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+@if (categories.Any())
+{
+    <div class="d-flex align-items-center justify-content-between mb-2">
+        <h4 class="mb-0">Kategoriler</h4>
+        <a class="text-decoration-none" asp-controller="Products" asp-action="Index">Tümünü gör</a>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        @foreach (var c in categories)
+        {
+            <a class="btn btn-sm btn-outline-dark"
+               asp-controller="Products"
+               asp-action="Index"
+               asp-route-categoryId="@c.Id">
+                @c.Name
+            </a>
+        }
+    </div>
+}
+
+@if (recommended.Any())
+{
+    <h4 class="mt-4 mb-3">Sana Özel Öneriler</h4>
+    <div class="row g-3 mb-4">
+        @foreach (var p in recommended)
+        {
+            <div class="col-12 col-sm-6 col-md-4">
+                <div class="card h-100 shadow-sm rounded-4 overflow-hidden border-0">
+                    @if (!string.IsNullOrWhiteSpace(p.ImagePath))
+                    {
+                        <img src="@p.ImagePath" alt="@p.Name" style="width:100%;height:180px;object-fit:cover;" />
+                    }
+                    else
+                    {
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="height:180px;">
+                            <div class="text-muted small">Ürün Görseli</div>
+                        </div>
+                    }
+
+                    <div class="card-body d-flex flex-column">
+                        <h6 class="mb-1">@p.Name</h6>
+                        <div class="text-muted small mb-2">@p.Category?.Name</div>
+                        <div class="fw-bold mb-3 mt-auto">@p.Price.ToString("N2") ₺</div>
+
+                        <a class="btn btn-primary w-100"
+                           asp-controller="Products"
+                           asp-action="Details"
+                           asp-route-id="@p.Id">
+                            İncele
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<div class="d-flex align-items-center justify-content-between mb-3 mt-4">
+    <h4 class="mb-0">Öne Çıkan Ürünler</h4>
+    <a class="text-decoration-none" asp-controller="Products" asp-action="Index">Tüm ürünlere git</a>
+</div>
+
+@if (!featured.Any())
+{
+    <div class="alert alert-warning rounded-4">
+        Şu an listelenecek ürün yok.
+        <span class="d-block mt-1">Admin panelden ürün ekleyebilirsin.</span>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var p in featured)
+        {
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden product-card">
+
+                    @if (!string.IsNullOrWhiteSpace(p.ImagePath))
+                    {
+                        <img src="@p.ImagePath" alt="@p.Name" style="width:100%;height:140px;object-fit:cover;" />
+                    }
+                    else
+                    {
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="height:140px;">
+                            <div class="text-muted small">Ürün Görseli</div>
+                        </div>
+                    }
+
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="fw-semibold">@p.Name</div>
+                                <div class="text-muted small">@p.Category?.Name</div>
+                            </div>
+                            <span class="badge bg-light text-dark">Stok: @p.Stock</span>
+                        </div>
+
+                        <div class="mt-3 d-flex justify-content-between align-items-center">
+                            <div class="fw-bold fs-5">@p.Price.ToString("N2") ₺</div>
+                            <span class="badge bg-success-subtle text-success border">Aktif</span>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-3">
+                            <a class="btn btn-sm btn-outline-primary w-50"
+                               asp-controller="Products"
+                               asp-action="Details"
+                               asp-route-id="@p.Id">
+                                Detay
+                            </a>
+                            <a class="btn btn-sm btn-primary w-50"
+                               asp-controller="Cart"
+                               asp-action="Add"
+                               asp-route-id="@p.Id">
+                                Sepete Ekle
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

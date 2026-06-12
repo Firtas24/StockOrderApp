@@ -1,0 +1,77 @@
+﻿@model StockOrderApp.Models.Product
+
+@{
+    ViewData["Title"] = "Ürün Düzenle";
+}
+
+<h2>Ürün Düzenle</h2>
+
+<form method="post" action="/Admin/Products/Edit/@Model.Id" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" asp-for="Id" />
+
+    <div style="margin-bottom:10px;">
+        <label>Ürün Adı</label><br />
+        <input asp-for="Name" />
+        <br />
+        <span asp-validation-for="Name" style="color:red;"></span>
+    </div>
+
+    <div class="col-md-6" style="margin-bottom:10px;">
+        <label class="form-label">Ürün Görseli</label>
+        <input type="file" name="imageFile" class="form-control" accept="image/*" />
+        <div class="form-text">
+            Boş bırakırsan mevcut görsel değişmez.
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.ImagePath))
+        {
+            <div class="mt-2">
+                <div class="text-muted small mb-1">Mevcut görsel:</div>
+                <img src="@Model.ImagePath"
+                     alt="mevcut ürün görseli"
+                     style="width:140px;height:140px;object-fit:cover;border-radius:12px;border:1px solid rgba(0,0,0,.08);" />
+            </div>
+        }
+    </div>
+
+    <div style="margin-bottom:10px;">
+        <label>Fiyat</label><br />
+        <input asp-for="Price" type="number" step="0.01" />
+        <br />
+        <span asp-validation-for="Price" style="color:red;"></span>
+    </div>
+
+    <div style="margin-bottom:10px;">
+        <label>Stok</label><br />
+        <input asp-for="Stock" type="number" />
+        <br />
+        <span asp-validation-for="Stock" style="color:red;"></span>
+    </div>
+
+    <div style="margin-bottom:10px;">
+        <label>Kategori</label><br />
+        <select asp-for="CategoryId" asp-items="ViewBag.CategoryList">
+            <option value="">-- Kategori Seç --</option>
+        </select>
+        <br />
+        <span asp-validation-for="CategoryId" style="color:red;"></span>
+    </div>
+
+    <div style="margin-bottom:15px;">
+        <label style="display:block; margin-bottom:6px;">Durum</label>
+        <label style="display:flex; align-items:center; gap:8px;">
+            <input asp-for="IsActive" type="checkbox" />
+            <span>Aktif Ürün (kapalıysa kullanıcı tarafında görünmez)</span>
+        </label>
+        <span asp-validation-for="IsActive" style="color:red;"></span>
+    </div>
+
+    <button type="submit">Güncelle</button>
+    <a href="/Admin/Products">Geri</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,14 @@
+﻿@model StockOrderApp.Models.Order
+
+<h2>Sipariş Alındı</h2>
+
+<div class="alert alert-success">
+    Siparişiniz başarıyla oluşturuldu. Sipariş No: <strong>#@Model.Id</strong>
+</div>
+
+<div class="text-muted">
+    Tarih: @Model.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+</div>
+
+<a class="btn btn-primary mt-3" asp-controller="Products" asp-action="Index">Ürünlere Dön</a>
+<a class="btn btn-outline-secondary mt-3" asp-controller="Cart" asp-action="Index">Sepete Git</a>

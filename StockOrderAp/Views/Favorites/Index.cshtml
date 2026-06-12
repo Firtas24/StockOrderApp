@@ -1,0 +1,63 @@
+﻿@model List<StockOrderApp.Models.UserFavorite>
+@{
+    ViewData["Title"] = "Favorilerim";
+}
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+        <h2 class="mb-0">Favorilerim</h2>
+        <div class="text-muted">Favoriye aldığın ürünler burada.</div>
+    </div>
+    <a class="btn btn-outline-dark" asp-controller="Products" asp-action="Index">Ürünlere Git</a>
+</div>
+
+@if (TempData["success"] != null)
+{
+    <div class="alert alert-success">@TempData["success"]</div>
+}
+
+@if (!Model.Any())
+{
+    <div class="alert alert-light border rounded-4">
+        Henüz favorilere ürün eklemedin.
+    </div>
+}
+else
+{
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Ürün</th>
+                        <th style="width:120px;">Fiyat</th>
+                        <th style="width:140px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var f in Model)
+                    {
+                        <tr>
+                            <td>@(f.Product?.Name ?? "Ürün bulunamadı")</td>
+                            <td>@(f.Product?.Price.ToString("N2") ?? "-") ₺</td>
+                            <td class="text-end">
+                                @if (f.Product != null)
+                                {
+                                    <a class="btn btn-sm btn-outline-primary" asp-controller="Products" asp-action="Details" asp-route-id="@f.Product.Id">
+                                        İncele
+                                    </a>
+
+                                    <form class="d-inline" asp-controller="Favorites" asp-action="Toggle" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="productId" value="@f.Product.Id" />
+                                        <button class="btn btn-sm btn-outline-danger" type="submit">Kaldır</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
